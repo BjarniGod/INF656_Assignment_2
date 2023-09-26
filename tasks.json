@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Shopping List",
+    "description": "Milk, Sugar, Bread, Apples",
+    "status": "not completed"
+  },
+  {
+    "title": "Books to read",
+    "description": "Harry Potter, Lord of the Rings",
+    "status": "not completed"
+  }
+]

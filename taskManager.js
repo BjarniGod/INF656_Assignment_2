@@ -16,13 +16,17 @@ function getAllTasks() {
   });
 }
 
-// Listing all tasks
 function listTasks() {
   getAllTasks().then(tasks => {
-    tasks.forEach((task, index) => {
-      console.log(`${index + 1}. ${task.title} - ${task.description} [${task.status}]`);
-    });
-    mainMenu();
+    if (tasks.length === 0) {
+      console.log('No tasks available');
+      mainMenu();
+    } else {
+      tasks.forEach((task, index) => {
+        console.log(`${index + 1}. ${task.title} - ${task.description} [${task.status}]`);
+      });
+      mainMenu();
+    }
   }).catch(error => {
     console.error('Error reading tasks:', error);
     mainMenu();
@@ -50,10 +54,10 @@ function completeTask(taskTitle) {
   getAllTasks().then(tasks => {
     const task = tasks.find(t => t.title === taskTitle);
     if (task) {
-      task.status = 'completed';
+      task.status = task.status === 'completed' ? 'not completed' : 'completed';
       fs.writeFile('tasks.json', JSON.stringify(tasks, null, 2), err => {
         if (err) return console.error('Error writing to file:', err);
-        console.log('Task marked as completed!');
+        console.log('Task marked as ' + task.status + '!');
         mainMenu();
       });
     } else {
@@ -66,9 +70,29 @@ function completeTask(taskTitle) {
   });
 }
 
+function deleteTask(taskTitle) {
+  getAllTasks().then(tasks => {
+    const taskIndex = tasks.findIndex(t => t.title === taskTitle);
+    if (taskIndex !== -1) {
+      tasks.splice(taskIndex, 1);
+      fs.writeFile('tasks.json', JSON.stringify(tasks, null, 2), err => {
+        if (err) return console.error('Error writing to file:', err);
+        console.log('Task deleted successfully!');
+        mainMenu();
+      });
+    } else {
+      console.log('Task not found.');
+      mainMenu();
+    }
+  }).catch(error => {
+    console.error('Error deleting task:', error);
+    mainMenu();
+  });
+}
+
 // User interaction
 function mainMenu() {
-  rl.question('Choose an action: (1) List tasks, (2) Add task, (3) Mark task as completed, (4) Exit: ', choice => {
+  rl.question('Choose an action:\n(1) List tasks, (2) Add task, (3) Mark task as completed/not completed, (4) Delete Task, (5) Exit: ', choice => {
     switch (choice) {
       case '1':
         listTasks();
@@ -86,6 +110,11 @@ function mainMenu() {
         });
         break;
       case '4':
+        rl.question('Enter the title of the task to delete: ', taskTitle => {
+          deleteTask(taskTitle);
+        });
+        break;
+      case '5':
         rl.close();
         break;
       default:
